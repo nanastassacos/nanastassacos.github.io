@@ -1,9 +1,9 @@
 ---
 title: "Bayesian Inference with Anchored Ensembles of Neural Networks, and Application to Exploration in Reinforcement Learning"
 collection: publications
-permalink: /02-07-2018
+permalink: /2018-07-02
 excerpt: 'This paper is about the number 1. The number 2 is left for future work.'
-date: 2018
+date: 2018-07-02
 venue: 'ICML Workshop'
 paperurl: 'https://arxiv.org/abs/1805.11324'
 authors: Nicolas Anastassacos, Mirco Musolesi
