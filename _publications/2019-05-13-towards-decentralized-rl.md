@@ -4,7 +4,7 @@ collection: publications
 permalink: /publication/2019-05-13-towards-decentralized-rl
 excerpt: 'Extended Abstract: Understanding the difficulties with decentralized reinforcement learning and potential solutions.'
 date: 2019-05-13
-venue: 'AAMAS 2019'
+venue: 'Autonomous Agents and Multi-Agent Systems'
 paperurl: 'https://dl.acm.org/citation.cfm?id=3331915'
 ---
 
