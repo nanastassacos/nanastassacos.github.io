@@ -5,7 +5,7 @@ permalink: /2019-11-21-parnter-selection
 excerpt: 'Investigating the emergence of cooperation in multi-agent reinforcement learning systems using partner selection.'
 date: 2019-11-21
 venue: 'AAAI-20'
-paperurl: 'https://arxiv.org/abs/1805.11324'
+paperurl: 'https://arxiv.org/abs/1902.03185'
 authors: Nicolas Anastassacos, Stephen Hailes, Mirco Musolesi
 ---
 
