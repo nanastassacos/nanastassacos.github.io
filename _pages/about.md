@@ -9,7 +9,7 @@ redirect_from:
 ---
 
 
-I am currently doing a PhD in Multi-agent Reinforcement Learning and its applications to Social Systems at UCL. I am co-supervised by Prof. Mirco Musolesi and Prof. Steve Hailes and am part of the Autonomous Agents lab. My PhD is funded by the Alan Turing Institute where, up until recent events, I spent most of my time. 
+I am currently doing a PhD in Multi-agent Reinforcement Learning and its applications to Social Systems at UCL. I am co-supervised by Prof. Mirco Musolesi and Prof. Steve Hailes and am part of the Autonomous Agents lab. My PhD is funded by the Alan Turing Institute where, up until recently, I spent most of my time. 
 
 I graduated from The University of Edinburgh with a BSc in Computational Cognitive Science in 2016 and then from University College London with an MSc in Data Science and Machine Learning in 2017.
 
