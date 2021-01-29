@@ -1,10 +1,10 @@
 ---
 title: "Cooperation and Reputation Dynamics with Reinforcement Learning"
 collection: publications
-permalink: /2020-01-01-cooperation-reputation
+permalink: /2021-01-01-cooperation-reputation
 excerpt: 'How reputation dynamics can promote cooperation using q-learning'
 date: 2021-01-01
-venue: 'AAMAS 2021'
+venue: 'Autonomous Agents and Multi-Agent Systems (AAMAS)'
 paperurl: 'coming soon'
 authors: Nicolas Anastassacos, Julian Garcia, Stephen Hailes, Mirco Musolesi
 ---
