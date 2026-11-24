@@ -108,19 +108,15 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
   .ms-toc-mark{display:block;position:absolute;left:-1px;top:0;width:2px;height:1.4rem;background:var(--accent);opacity:0;
     transition:transform .28s ease,height .28s ease,opacity .2s}
 }
-/* The live pieces' look (widgets.js). The three figures are drawn as the dock draws them: its colours (draw.ts COLOURS,
-   board.ts SETTLE_STOPS, lookup.ts TINTS), its face, its dark ground on any page. */
 .ms-widget{--w-ink:var(--ink,#1c1f26);--w-muted:var(--muted,#636976);--w-accent:var(--accent,#5a3fcf);margin:1.8rem 0 2.4rem;min-width:0}
 .ms-widget .ms-cap{margin-top:.8rem}
 
-/* the logo by the title */
 .ms-title{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;margin:0 0 .7rem}
 .ms-logo{background:#14161a;border-radius:14px;padding:12px 14px 8px;line-height:0;flex:none}
 .ms-logo canvas{width:144px;height:88px;image-rendering:pixelated;image-rendering:crisp-edges}
 .ms-title h1{margin:0}
 .ms-name{margin:0 0 .25rem;font-weight:600;color:var(--accent,#5a3fcf)}
 
-/* the dock's frame */
 .dk{--d-bg:#0b0d10;--d-text:#d7dbe2;--d-dim:#7b8492;--d-faint:#5d6674;--d-rule:#2c323c;--d-unlit:#181b21;--d-accent:#f0a23a;
   --d-good:#7fc98f;--d-mid:#e3c35c;--d-bad:#e98a80;--d-lens:#b79cf2;--d-help:#6e96c8;
   background:var(--d-bg);color:var(--d-text);border-left:4px solid var(--d-accent);border-radius:0 8px 8px 0;
@@ -134,8 +130,7 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
 .dk-h span,.dk-dim{color:var(--d-dim);font-weight:400}
 .dk-faint{color:var(--d-faint)}
 .dk-rule{border:0;border-top:1px solid var(--d-rule);margin:.7rem 0}
-.dk-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-height:18.6em;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--d-rule) transparent;padding-right:.4rem}   /* a reply: 12 lines at the most, then it scrolls */
-.dk-text span{cursor:default}
+.dk-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-height:18.6em;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--d-rule) transparent;padding-right:.4rem}   .dk-text span{cursor:default}
 .dk-hint{margin:.7rem 0 0;padding-top:.5rem;border-top:1px solid var(--d-rule);color:var(--d-dim);display:flex;gap:.1rem 1.1rem;flex-wrap:wrap}
 .dk-hint i{display:inline-block;width:.75em;height:.75em;margin-right:.4em}
 .dk .c-good{color:var(--d-good)}.dk .c-mid{color:var(--d-mid)}.dk .c-bad{color:var(--d-bad)}
@@ -144,7 +139,6 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
 .dk-read b{font-weight:700}
 @media (max-width:30rem){.dk{font-size:12px;padding:.7rem .75rem}}
 
-/* two replies on the board: MAP (its shades: board.ts MAP_SHADE) beside TOKENS */
 #ms-maps{display:grid;gap:1.2rem}
 .mp-ask{margin:0 0 .5rem}
 .mp-text{height:18.6em;position:relative}
@@ -165,7 +159,6 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
 .mp-toks .bar.c-good i{background:var(--d-good)}.mp-toks .bar.c-mid i{background:var(--d-mid)}.mp-toks .bar.c-bad i{background:var(--d-bad)}
 @media (max-width:44rem){.mp-board{grid-template-columns:minmax(0,1fr)}}
 
-/* the settling map */
 .se-line{display:flex;gap:0 1rem;flex-wrap:wrap;align-items:baseline}
 .se-line .dk-h{color:var(--d-lens)}
 .se-line .dk-h span{color:var(--d-lens)}
@@ -184,7 +177,6 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
 .se-notes{margin:.8rem 0 0;padding:0;list-style:none;font-size:.86rem;line-height:1.45;color:var(--w-muted)}
 .se-notes + .ms-cap,.ms-widget > div:has(.se-notes) + .ms-cap{margin-top:.15rem}
 
-/* the engram inspection */
 .en-text span{color:var(--d-faint)}
 .en-text .h1{color:#758dad}.en-text .h2{color:#7192bc}.en-text .h3{color:var(--d-help)}
 .dk-hint i.h1{background:#758dad}
@@ -205,7 +197,6 @@ pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:p
 .en-toks .bar.on{border-left-color:var(--d-help)}
 .en-toks .bar.on i{background:var(--d-help)}
 
-/* the Steer page */
 .st-page{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:.2rem 1.6rem}
 .st-list{display:grid;align-content:start}
 .st-list .dk-h{margin-bottom:.1rem}
@@ -361,7 +352,7 @@ metalscope doctor</code></pre>
     document.querySelectorAll('.ms-post .ms-chart').forEach(function(el){
       var f = window.MS_FIGS[el.dataset.fig]; if (!f) return;
       var T = window.MS_THEME || {}, s = JSON.stringify(f);
-      if (T.dark && window.MS_SWAP) {   // one pass: a dark step is another's light step
+      if (T.dark && window.MS_SWAP) {
         var keys = Object.keys(window.MS_SWAP).map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
         s = s.replace(new RegExp(keys.join('|'), 'g'), function(m){ return window.MS_SWAP[m]; });
       }

@@ -1,10 +1,3 @@
-/* The post's live pieces, drawn from files/metalscope/data.js; the three figures as the dock draws them:
-   .ms-toc     the contents list: the card in view marked
-   #ms-logo    the dock's idle scene (MS_IDLE: idle.ts's frames)
-   #ms-steer   the Steer page: a concept's test chats by dose (MS_CHATS: the calibrations)
-   #ms-maps    two replies as the board draws them: REPLY, MAP, TOKENS (MS_MAPS: a sure reply and an unsure one)
-   #ms-settle  one reply's REPLY and SETTLING (MS_SETTLE: a captured reply's lens read-outs)
-   #ms-engram  the same reply's engram inspection (MS_ENGRAM: its read with and without the engram) */
 (function () {
   'use strict';
   var esc = function (s) {
@@ -18,7 +11,6 @@
   };
   var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // -- the logo: the idle scene, a pixel a canvas pixel, scaled up by CSS ------------------------------------------
   function logo(canvas, d) {
     canvas.width = d.w;
     canvas.height = d.h;
@@ -43,7 +35,6 @@
     else run(true);
   }
 
-  // -- a reply's text: the little Markdown the model writes, nothing else ------------------------------------------
   function prose(text) {
     return esc(text.trim())
       .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
@@ -54,8 +45,7 @@
       .replace(/\n/g, '<br>');
   }
 
-  // -- the dock's frame: its title line, then the piece's own lines, then the key line -----------------------------
-  var conf = function (p) { return p == null || p < 0.5 ? 'c-bad' : p < 0.9 ? 'c-mid' : 'c-good'; };   // draw.ts confColor
+  var conf = function (p) { return p == null || p < 0.5 ? 'c-bad' : p < 0.9 ? 'c-mid' : 'c-good'; };
   var quote = function (s) { return '"' + esc(s.replace(/\n/g, '\\n')) + '"'; };
   var pct = function (x) { return x < 0 ? '·' : x < 0.5 ? '<0.5%' : (x < 10 ? x.toFixed(1) : Math.round(x)) + '%'; };
   function dock(root, model) {
@@ -71,7 +61,6 @@
     b.addEventListener('click', pick);
     return b;
   }
-  // A reply's tokens as spans in `p`; `at(i)` on pointing at or tapping one, `out()` on leaving the text.
   function tokens(p, toks, cls, at, out) {
     var spans = toks.map(function (t, i) {
       var s = el('span', cls(t, i), esc(t.t));
@@ -84,7 +73,6 @@
     return spans;
   }
 
-  // -- the Steer page: the concepts, a concept's doses, one turn of a test chat with and without the steer --------
   function steer(root, d) {
     var state = { c: 0, dose: null, arc: d.arcs[0], turn: 2 };
     var k = dock(root, d.model + ' · ds4'), page = k.add(el('div', 'st-page')), list = el('div', 'st-list'), info = el('div', 'st-info');
@@ -155,13 +143,12 @@
     draw();
   }
 
-  // -- two replies as the dock's board draws them: REPLY round the token in focus, MAP beside TOKENS ----------------
   function maps(root, d) {
     var NS = 'http://www.w3.org/2000/svg';
     d.replies.forEach(function (r) {
-      var COLS = Math.max(35, Math.ceil(Math.sqrt(1.8 * r.n)));       // a map about 9 wide to 5 high, its cells never wider than a 35th
+      var COLS = Math.max(35, Math.ceil(Math.sqrt(1.8 * r.n)));
       var k = dock(root, d.model), rows = Math.ceil(r.n / COLS), unsure = r.p.filter(function (p) { return p < 0.5; }).length, home = 0;
-      r.p.forEach(function (p, i) { if (p < 0.5 && (r.p[home] >= 0.5 || p > r.p[home])) home = i; });   // the closest call
+      r.p.forEach(function (p, i) { if (p < 0.5 && (r.p[home] >= 0.5 || p > r.p[home])) home = i; });
       k.add(el('p', 'mp-ask', '<span class="dk-dim">› </span>' + esc(r.prompt)));
       k.add(el('p', 'dk-h', 'REPLY'));
       var text = k.add(el('p', 'dk-text mp-text'));
@@ -179,7 +166,7 @@
       svg.setAttribute('preserveAspectRatio', 'none');
       svg.setAttribute('role', 'img');
       svg.setAttribute('aria-label', 'The reply one cell per token: ' + Math.round(100 * r.green) + '% green, ' + Math.round(100 * r.red) + '% red');
-      svg.style.aspectRatio = COLS + ' / ' + rows;      // square cells
+      svg.style.aspectRatio = COLS + ' / ' + rows;
       r.p.forEach(function (p, i) {
         var c = rect(conf(p));
         c.setAttribute('x', i % COLS);
@@ -195,7 +182,7 @@
         cur.setAttribute('y', Math.floor(i / COLS));
         spans[at].classList.remove('cur');
         spans[at = i].classList.add('cur');
-        if (show) { var lh = parseFloat(getComputedStyle(text).lineHeight) || 20; text.scrollTop = spans[i].offsetTop - Math.floor(text.clientHeight / lh / 2) * lh; }     // from MAP: the cursor's line in the middle, on a whole line
+        if (show) { var lh = parseFloat(getComputedStyle(text).lineHeight) || 20; text.scrollTop = spans[i].offsetTop - Math.floor(text.clientHeight / lh / 2) * lh; }
         var all = [[r.t[i], r.p[i], true]].concat(r.a[i].map(function (x) { return [x[0], x[1], false]; }))
           .sort(function (x, y) { return y[1] - x[1]; }).slice(0, 10);
         toks.innerHTML = '<span class="hd">TOKENS <span class="dk-dim">#' + i + ' ' + quote(r.t[i]) + ' · ' + pct(100 * r.p[i]) + '</span></span>';
@@ -216,7 +203,6 @@
     });
   }
 
-  // -- the settling map: REPLY over SETTLING, as LENS draws them ------------------------------------------------------
   function settle(root, d) {
     var NS = 'http://www.w3.org/2000/svg', ROW = 4.6, N = d.tokens.length;
     var early = d.notes.filter(function (n) { return n.kind === 'early'; })[0];
@@ -308,7 +294,6 @@
     draw();
   }
 
-  // -- the engram inspection: the reply in the engram's blue, TOKENS without and with it ------------------------------
   function engram(root, d) {
     var N = d.tokens.length, state = { at: d.home };
     var k = dock(root, d.model);
@@ -339,7 +324,6 @@
     focus(d.home);
   }
 
-  // -- the contents: the card in view marked, the mark sliding from one to the next ---------------------------------
   function toc(nav) {
     var links = [].slice.call(nav.querySelectorAll('li > a')), mark = nav.appendChild(el('i', 'ms-toc-mark')), cur = -2;
     var heads = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
