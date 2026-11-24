@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>metalscope: a view inside your local model</title>
+<meta name="description" content="Watch a local model&#x27;s internals live on a Mac: token probabilities, lenses, expert routing and steering.">
+<meta property="og:type" content="article"><meta property="og:title" content="metalscope: a view inside your local model">
+<meta property="og:description" content="Watch a local model&#x27;s internals live on a Mac: token probabilities, lenses, expert routing and steering.">
+<meta property="og:image" content="https://nanastassacos.github.io/files/metalscope/main-run.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink)}
+a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:focus-visible,video:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3{text-wrap:balance}
+.top,main,footer{margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.top{padding-top:1.4rem;font-size:.9rem}
+.top a,footer a{color:var(--muted);text-decoration:none}
+.top a:hover,footer a:hover{color:var(--ink)}
+footer{padding-top:1.5rem;padding-bottom:3rem;font-size:.85rem;color:var(--muted)}
+.date{color:var(--muted);font-size:.9rem;margin:0 0 2.2rem}
+figure{margin:0}
+video{display:block;width:100%;height:auto;background:#14161a}
+dl,dd{margin:0}
+.ms-clips > figure{max-width:min(100%,calc(var(--ar,1.5)*88vh))}
+.ms-charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(20rem,100%),1fr))}
+.ms-charts > div{min-width:0}
+.ms-chart{width:100%;height:300px}
+pre{overflow-x:auto;margin:1rem 0}
+code{font-family:"JetBrains Mono", ui-monospace, Menlo, monospace}
+.ms-toc{font-size:.9rem;margin:0 0 1.2rem}
+.ms-toc-h{color:var(--muted);margin-bottom:.2rem}
+.ms-toc ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.15rem 1.1rem}
+.ms-toc a{text-decoration:none}
+.ms-toc a:hover{text-decoration:underline}
+.ms-toc-mark{display:none}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ms-toc-mark,.ms-toc a{transition:none!important}}
+h3,h2[id]{scroll-margin-top:1rem}
+.ms-head h3{margin-bottom:.55rem}
+.ms-intro ol,.ms-intro ul{margin:0 0 1rem;padding-left:1.4rem}
+.ms-intro li{margin:.2rem 0}
+h2.ms-section{border-top-color:var(--ink);margin-top:4rem}
+.ms-post > .ms-clips + p,.ms-post > .ms-widget + p{margin-top:1.2rem}
+.ms-post > figure + .ms-intro{margin-top:1.8rem}
+.ms-bench{overflow-x:auto;margin:1.2rem 0 .5rem}
+.ms-bench table{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}
+.ms-bench th{font-weight:400;color:var(--muted);text-align:right;padding:.3rem 0 .4rem .9rem;white-space:nowrap}
+.ms-key td{text-align:left;vertical-align:top;white-space:normal}
+.ms-key td:first-child{font-weight:500;padding-right:1.2rem}
+.ms-bench th.ms-span{text-align:center;border-bottom:1px solid var(--rule);padding-bottom:.2rem}
+.ms-bench td{text-align:right;padding:.38rem 0 .38rem .9rem;border-top:1px solid var(--rule)}
+.ms-bench td:first-child,.ms-bench th:first-child{text-align:left;padding-left:0;white-space:nowrap}
+.ms-post > p.ms-cap{font-size:.84rem;color:var(--muted);margin:0 0 1.6rem}
+.ms-foot{font-size:.86rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:1rem;margin-top:2.4rem}
+.ms-section{border:0;border-top:1px solid var(--rule);margin:3rem 0 1.6rem}
+.ms-models{font-size:.82rem;line-height:1.4;margin:0 0 1rem;max-width:14rem}
+.ms-models-h{color:var(--muted);font-size:.76rem;padding:.45rem 0 .15rem;border-top:1px solid var(--rule)}
+.ms-models ul{list-style:none;margin:0 0 .45rem;padding:0}
+.ms-models li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 .5rem;padding:.16rem 0}
+.ms-models small{flex-basis:100%;color:var(--muted);font-size:.74rem}
+.ms-engines{display:flex;flex-wrap:wrap;gap:.6rem;margin:.15rem 0 .3rem}
+.ms-engine{border:1px solid var(--rule);border-radius:8px;padding:.45rem .8rem .5rem;background:var(--code,transparent)}
+.ms-engine b{font:500 .72rem/1.5 "JetBrains Mono", ui-monospace, Menlo, monospace;color:var(--muted)}
+.ms-models .ms-engine ul{display:block;margin:.1rem 0 0}
+.ms-models .ms-engine small{flex-basis:100%}
+
+:root{--bg:#fafafb;--ink:#1c1f26;--muted:#636976;--rule:#e1e3e9;--accent:#5a3fcf;--code:#f0f1f5}
+body{font:18px/1.6 "Instrument Sans",system-ui,sans-serif}
+.top,main,footer{max-width:calc(44rem + 40px)}
+main{padding-top:3.2rem;padding-bottom:3rem}
+h1{font-size:clamp(1.8rem,4.6vw,2.3rem);line-height:1.1;letter-spacing:-.022em;font-weight:600;margin:0;max-width:22ch}
+.ms-title > div:last-child{flex:1 1 16rem;min-width:0}
+.ms-intro p{margin:0 0 1rem}
+.ms-post > p{margin:0 0 1rem}
+.ms-post > figure{margin:1.8rem 0 0}
+.ms-post > figure.ms-widget{margin:1.8rem 0 2.4rem}
+.ms-name{font-size:1.05rem}
+.date{margin-top:1rem}
+h2{font-size:1.55rem;letter-spacing:-.01em;font-weight:600;margin:4rem 0 1.6rem;padding-top:1.3rem;border-top:1px solid var(--ink)}
+h3{font-size:1.35rem;line-height:1.25;font-weight:600;letter-spacing:-.01em;margin:1.6rem 0 .5rem}
+video{border-radius:10px;border:1px solid var(--rule)}
+figcaption,.ms-cap{color:var(--muted);font-size:.86rem;line-height:1.45;margin:.55rem 0 0}
+.ms-clips{gap:1.9rem;margin:1.6rem 0 2.4rem}
+.ms-charts{grid-template-columns:1fr;gap:2rem;margin:.6rem 0 2.6rem}
+code{font-size:.82em;background:#0b0d10;color:#d7dbe2;padding:.14em .45em;border-radius:5px;white-space:nowrap}
+pre{background:#0b0d10;color:#d7dbe2;border-left:4px solid #f0a23a;border-radius:0 8px 8px 0;padding:1rem 1.2rem;font-size:.84rem;line-height:1.6}
+pre code{font-size:inherit;background:none;color:inherit;padding:0;white-space:pre}
+.ms-head{margin:0 0 1.2rem}
+.ms-head h3{margin:0 0 .55rem}
+.ms-models{max-width:none;margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:.25rem .9rem;align-items:baseline}
+.ms-models-h{border:0;padding:0}
+.ms-models ul{margin:0;display:flex;flex-wrap:wrap;gap:.1rem 1.3rem}
+.ms-models li{justify-content:flex-start;padding:0}
+.ms-models small{flex-basis:auto}
+.ms-models .ms-engine small{flex-basis:100%}
+.ms-models{font-size:.88rem;line-height:1.5;row-gap:.35rem}
+.ms-models-h{font-size:.8rem}
+@media (min-width:84rem){
+  .ms-post > .ms-toc{position:fixed;left:max(1.5rem,env(safe-area-inset-left,0px));top:6.5rem;width:9.8rem;padding:0 0 0 .95rem;border-left:1px solid var(--rule)}
+  .ms-toc ol{display:block}
+  .ms-toc li{padding:.08rem 0}
+  .ms-toc a{display:block;color:var(--muted);transition:color .2s}
+  .ms-toc li.on > a,.ms-toc a:hover{color:var(--ink)}
+  .ms-toc li.on > a{font-weight:600}
+  .ms-toc-mark{display:block;position:absolute;left:-1px;top:0;width:2px;height:1.4rem;background:var(--accent);opacity:0;
+    transition:transform .28s ease,height .28s ease,opacity .2s}
+}
+/* The live pieces' look (widgets.js). The three figures are drawn as the dock draws them: its colours (draw.ts COLOURS,
+   board.ts SETTLE_STOPS, lookup.ts TINTS), its face, its dark ground on any page. */
+.ms-widget{--w-ink:var(--ink,#1c1f26);--w-muted:var(--muted,#636976);--w-accent:var(--accent,#5a3fcf);margin:1.8rem 0 2.4rem;min-width:0}
+.ms-widget .ms-cap{margin-top:.8rem}
+
+/* the logo by the title */
+.ms-title{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;margin:0 0 .7rem}
+.ms-logo{background:#14161a;border-radius:14px;padding:12px 14px 8px;line-height:0;flex:none}
+.ms-logo canvas{width:144px;height:88px;image-rendering:pixelated;image-rendering:crisp-edges}
+.ms-title h1{margin:0}
+.ms-name{margin:0 0 .25rem;font-weight:600;color:var(--accent,#5a3fcf)}
+
+/* the dock's frame */
+.dk{--d-bg:#0b0d10;--d-text:#d7dbe2;--d-dim:#7b8492;--d-faint:#5d6674;--d-rule:#2c323c;--d-unlit:#181b21;--d-accent:#f0a23a;
+  --d-good:#7fc98f;--d-mid:#e3c35c;--d-bad:#e98a80;--d-lens:#b79cf2;--d-help:#6e96c8;
+  background:var(--d-bg);color:var(--d-text);border-left:4px solid var(--d-accent);border-radius:0 8px 8px 0;
+  padding:.85rem 1.1rem .8rem;font:13px/1.55 "JetBrains Mono",ui-monospace,Menlo,monospace;font-variant-ligatures:none;overflow:hidden;color-scheme:dark}
+.dk button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.dk button:focus-visible{outline:2px solid var(--d-accent);outline-offset:2px}
+.dk-top{display:flex;gap:0 1.2rem;flex-wrap:wrap;color:var(--d-accent);padding-bottom:.45rem;border-bottom:1px solid var(--d-rule);margin-bottom:.6rem}
+.dk-top b{font-weight:700}
+.dk-right{margin-left:auto;color:var(--d-faint)}
+.dk-h{margin:0;color:var(--d-accent);font-weight:700}
+.dk-h span,.dk-dim{color:var(--d-dim);font-weight:400}
+.dk-faint{color:var(--d-faint)}
+.dk-rule{border:0;border-top:1px solid var(--d-rule);margin:.7rem 0}
+.dk-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-height:18.6em;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--d-rule) transparent;padding-right:.4rem}   /* a reply: 12 lines at the most, then it scrolls */
+.dk-text span{cursor:default}
+.dk-hint{margin:.7rem 0 0;padding-top:.5rem;border-top:1px solid var(--d-rule);color:var(--d-dim);display:flex;gap:.1rem 1.1rem;flex-wrap:wrap}
+.dk-hint i{display:inline-block;width:.75em;height:.75em;margin-right:.4em}
+.dk .c-good{color:var(--d-good)}.dk .c-mid{color:var(--d-mid)}.dk .c-bad{color:var(--d-bad)}
+.dk-text .cur{background:var(--d-text);color:var(--d-bg)}
+.dk-read{margin:.5rem 0 0;min-height:3.1em}
+.dk-read b{font-weight:700}
+@media (max-width:30rem){.dk{font-size:12px;padding:.7rem .75rem}}
+
+/* two replies on the board: MAP (its shades: board.ts MAP_SHADE) beside TOKENS */
+#ms-maps{display:grid;gap:1.2rem}
+.mp-ask{margin:0 0 .5rem}
+.mp-text{height:18.6em;position:relative}
+.mp-board{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem 1.6rem}
+.mp-map svg{display:block;width:100%;background:var(--d-unlit);shape-rendering:crispEdges;touch-action:pan-y;margin-top:.2rem}
+.mp-map .c-good{fill:#466953}.mp-map .c-mid{fill:#a6914a}.mp-map .c-bad{fill:#e98a80}
+.mp-map .mp-cur{fill:var(--d-text)}
+.mp-toks{display:grid;grid-template-columns:minmax(6em,max-content) minmax(2rem,1fr) 3.6em;gap:0 .7em;align-items:center;align-content:start}
+.mp-toks .hd{grid-column:1 / -1;color:var(--d-accent);font-weight:700;white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.mp-toks .hd span{font-weight:400}
+.mp-toks .w{white-space:pre;overflow:hidden;text-overflow:ellipsis;max-width:14em}
+.mp-toks .w::before{content:"  "}
+.mp-toks .w.mine::before{content:"\25b8 ";color:var(--d-accent)}
+.mp-toks .w.mine{font-weight:700}
+.mp-toks .n{text-align:right}
+.mp-toks .bar{height:1.05em;border-left:1px solid var(--d-faint)}
+.mp-toks .bar i{display:block;height:100%;background:var(--d-dim);max-width:100%}
+.mp-toks .bar.c-good i{background:var(--d-good)}.mp-toks .bar.c-mid i{background:var(--d-mid)}.mp-toks .bar.c-bad i{background:var(--d-bad)}
+@media (max-width:44rem){.mp-board{grid-template-columns:minmax(0,1fr)}}
+
+/* the settling map */
+.se-line{display:flex;gap:0 1rem;flex-wrap:wrap;align-items:baseline}
+.se-line .dk-h{color:var(--d-lens)}
+.se-line .dk-h span{color:var(--d-lens)}
+.se-sw span{color:var(--d-dim)}.se-sw span.on,.se-sw i{color:var(--d-lens);font-style:normal}
+.se-map{display:grid;grid-template-columns:2.6em minmax(0,1fr);margin-top:.15rem}
+.se-tags{grid-column:2;position:relative;height:1.35em}
+.se-tags b{position:absolute;top:0;transform:translateX(-50%);width:1.25em;height:1.25em;line-height:1.25em;border-radius:50%;
+  background:var(--d-accent);color:var(--d-bg);font-size:.82em;text-align:center}
+.se-ys{position:relative;color:var(--d-faint)}
+.se-ys span{position:absolute;left:0;transform:translateY(-15%);line-height:1}
+.se-map svg{display:block;width:100%;background:var(--d-unlit);shape-rendering:crispEdges;touch-action:pan-y}
+.se-map .l1{fill:#322854}.se-map .l2{fill:#705aaa}.se-map .l3{fill:#b79cf2}
+.dk-hint i.l1{background:#322854}.dk-hint i.l2{background:#705aaa}.dk-hint i.l3{background:#b79cf2}.dk-hint i.fo{background:#6e7178}
+.se-map .se-col{fill:#6e7178}
+.se-map .se-cell{fill:none;stroke:#ece2ff;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.se-notes{margin:.8rem 0 0;padding:0;list-style:none;font-size:.86rem;line-height:1.45;color:var(--w-muted)}
+.se-notes + .ms-cap,.ms-widget > div:has(.se-notes) + .ms-cap{margin-top:.15rem}
+
+/* the engram inspection */
+.en-text span{color:var(--d-faint)}
+.en-text .h1{color:#758dad}.en-text .h2{color:#7192bc}.en-text .h3{color:var(--d-help)}
+.dk-hint i.h1{background:#758dad}
+.en-text .blk{background:#415875;color:var(--d-text)}
+.en-text .pred{font-weight:700;text-decoration:underline;text-underline-offset:.2em}
+.en-title{margin:0 0 .15rem;display:flex;gap:0 1.3rem;flex-wrap:wrap}
+.en-toks{display:grid;grid-template-columns:minmax(6.5em,max-content) 3.6em minmax(2rem,1fr) 3.6em minmax(2rem,1fr);gap:0 .7em;max-width:38rem;align-items:center}
+.en-toks .hd{color:var(--d-dim)}
+.en-toks .hd:first-child{color:var(--d-accent);font-weight:700}
+.en-toks .n{text-align:right}
+.en-toks .w{white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.en-toks .w::before{content:"  "}
+.en-toks .w.mine::before{content:"▸ ";color:var(--d-accent)}
+.en-toks .w.mine{font-weight:700}
+.en-toks .on{color:var(--d-help)}
+.en-toks .bar{height:1.05em;border-left:1px solid var(--d-faint)}
+.en-toks .bar i{display:block;height:100%;background:var(--d-dim)}
+.en-toks .bar.on{border-left-color:var(--d-help)}
+.en-toks .bar.on i{background:var(--d-help)}
+
+/* the Steer page */
+.st-page{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:.2rem 1.6rem}
+.st-list{display:grid;align-content:start}
+.st-list .dk-h{margin-bottom:.1rem}
+.dk .st-c{display:grid;grid-template-columns:10.5em 3.4em 3em;gap:0 .6em;padding-right:.5em;white-space:pre}
+.dk .st-c span:first-child::before{content:"  "}
+.dk .st-c.on{background:var(--d-accent);color:var(--d-bg);font-weight:700}
+.dk .st-c.on span:first-child::before{content:"▸ "}
+.dk .st-c span:nth-child(2){text-align:right}
+.st-info{border-left:1px solid var(--d-rule);padding-left:1.1rem;min-width:0}
+.st-info p{margin:0}
+.st-about{color:var(--d-dim);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.st-doses{display:grid;grid-template-columns:3.2em repeat(var(--n),minmax(2.4em,3.4em));margin-top:.1rem;align-items:end;row-gap:.15em;margin-bottom:.4em}
+.st-doses .lab{color:var(--d-dim)}
+.dk .st-d{text-align:center;padding:0 .2em}
+.dk .st-d.on{background:var(--d-accent);color:var(--d-bg);font-weight:700}
+.st-bar{height:2.1em;display:flex;align-items:flex-end;justify-content:center}
+.st-bar i{display:block;width:.9em;background:var(--d-good);min-height:1px}
+.st-pick{color:var(--d-good)}
+.st-ex{display:flex;gap:.1rem 1.1rem;flex-wrap:wrap;align-items:baseline}
+.dk .st-arc{color:var(--d-dim)}
+.dk .st-arc.on{color:var(--d-text);font-weight:700}
+.dk .st-nav{color:var(--d-accent)}
+.dk .st-nav[disabled]{color:var(--d-faint);cursor:default}
+.st-user{margin:.1rem 0 .7rem;font-weight:700}
+.st-user span{color:var(--d-accent);font-weight:400;margin-right:.8em}
+.st-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.st-pair.one{grid-template-columns:minmax(0,1fr)}
+.st-side{min-width:0;padding-right:1.1rem}
+.st-side + .st-side{border-left:1px solid var(--d-rule);padding:0 0 0 1.1rem}
+.st-head{margin:0;color:var(--d-dim);font-weight:700}
+.st-head span{font-weight:400;margin-left:.8em}
+.st-side.steered .st-head{color:var(--d-accent)}
+.st-side.steered .st-head span.good{color:var(--d-good)}
+.st-body{height:15.5em;overflow-y:auto;overflow-wrap:anywhere;color:var(--d-dim);scrollbar-width:thin;scrollbar-color:var(--d-rule) transparent;padding-right:.4rem}
+.st-side.steered .st-body{color:var(--d-text)}
+@media (max-width:44rem){
+  .st-page{grid-template-columns:minmax(0,1fr)}
+  .st-info{border-left:0;padding-left:0;margin-top:.5rem}
+  .st-pair{grid-template-columns:minmax(0,1fr);gap:.8rem}
+  .st-side{padding-right:0}
+  .st-side + .st-side{border-left:0;padding-left:0}
+  .st-body{height:auto;max-height:13em}
+}
+</style>
+</head><body>
+<div class="top"><a href="/">Nicolas Anastassacos</a></div>
+<main>
+<div class="ms-title"><div class="ms-logo"><canvas id="ms-logo" role="img" aria-label="A small robot looks through a lens"></canvas></div><div><p class="ms-name">metalscope</p><h1>A view inside your local model</h1></div></div>
+<p class="date">21 November 2026</p>
+<div class="ms-post">
+<div class="ms-intro"><p>I wanted a little avatar for my local model: something beside the terminal that showed what was happening inside the model as it worked. After a few attempts that didn&#x27;t feel right, it became more practical, and more fun, to visualise the model&#x27;s internal state itself and make that the show. That turned into <a href="https://github.com/nanastassacos/metalscope">metalscope</a>.</p><p>Here&#x27;s a quick demo. The rest of the post goes through each feature in turn.</p></div>
+<figure style="--ar:2.013"><video controls preload="metadata" poster="/files/metalscope/main-run.jpg"><source src="/files/metalscope/main-run.webm" type="video/webm"><source src="/files/metalscope/main-run.mp4" type="video/mp4"></video><figcaption>The whole thing in four minutes.</figcaption></figure>
+<div class="ms-intro"><p>Metalscope sits on top of two inference engines for Apple Silicon: <a href="https://github.com/jundot/omlx">oMLX</a>, by jundot, who now works on it full time at Hugging Face, and <a href="https://github.com/antirez/ds4">ds4</a> from antirez. It leaves the inference kernels of both alone. On oMLX it installs hooks into the running server and on ds4 it applies a small patch, and in both cases the job is the same: record traces, usually activations, while the model generates. From those traces we can pull out some fun information about how the model is working things out, and get a glimpse of its internal state.</p><p>All of this shows up in <a href="https://github.com/earendil-works/pi">Pi</a>, a coding agent that runs in your terminal: metalscope adds a dock beside the chat that fills in live as the model generates, plus a few commands. The clips in this post are all recorded in Pi with that dock open.</p><p>It comes with a handful of features:</p><ol class="ms-list"><li>Token probabilities for every prediction: the reply coloured by the assigned probability</li><li>Engram analysis to see which predictions leaned on the model&#x27;s static lookup table</li><li>Logit and Jacobian lenses to look at the model&#x27;s internal state and at when it might have decided what to say</li><li>Mixture of Experts routing to see which parts of the model are used for which kind of prediction</li><li>Steering - a mostly experimental way to control the model&#x27;s output through its activations, without having to use prompts!</li></ol><p>There are lots of ways to interpret these traces, so rather than focusing on one, the goal of metalscope is to find a fun way to visualise all of them and present them in a way anyone can understand.</p><p>It&#x27;s also just about having something to look at while the model is processing away: the full dock when you want to inspect things, or the mini dock as a little light show. The traces aren&#x27;t free though and the numbers for every model are at the end.</p></div>
+<nav class="ms-toc" aria-label="Contents"><div class="ms-toc-h">Contents</div><ol><li><a href="#required">Required</a></li><li><a href="#replies">Replies</a></li><li><a href="#maps">Maps</a></li><li><a href="#engram">Engram</a></li><li><a href="#lenses">Lenses</a></li><li><a href="#word-swap">Word swap</a></li><li><a href="#experts">Experts</a></li><li><a href="#steering">Steering</a></li><li><a href="#other-models">Other models</a></li><li><a href="#impact-on-decode-speed">Impact on decode speed</a></li><li><a href="#try-it">Try it</a></li></ol></nav>
+<h2 class="ms-section" id="required">Required</h2><div class="ms-intro"><ul class="ms-list"><li>A Mac.</li><li>An engine to serve the model: <a href="https://github.com/jundot/omlx">oMLX</a> for MLX models, or <a href="https://github.com/antirez/ds4">ds4</a> for Qwen3.8 Flash Next and DeepSeek V4.1 Flash.</li><li><a href="https://github.com/earendil-works/pi">Pi</a> for the dock. Without it, the same features work from the command line (but no visual dock).</li><li>Not every feature runs on every model, so each one below lists what it runs on. Replies and maps work with any chat model, the engram needs a model that has one, and the expert map needs a mixture of experts. Residual streams are handled differently per model since there&#x27;s a lot of variety but hopefully the display is fun and informative on a basic level.</li></ul></div>
+<h2 class="ms-section" data-section="Replies" id="quick-feature-overview">Quick feature overview</h2>
+<div class="ms-head"><h3 id="replies">Replies</h3><div class="ms-models"><div class="ms-models-h">Runs on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Any chat model</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Any chat model</li></ul></div></div><div class="ms-models-h">Checked on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.5 2B</li><li>Qwen3.6 35B</li><li>Qwen3.8 27B</li><li>Qwen3.8 Flash Next</li><li>Inkling 2 Mini</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li><li>DeepSeek V4.1 Flash</li></ul></div></div><div class="ms-models-h">What it is</div><div>The model&#x27;s reply, each token coloured by the probability the model gave it: green 90% and up, yellow 50 to 90%, red under 50%.</div><div class="ms-models-h">In practice</div><div>It fills in live as the model writes. <code>←</code> <code>→</code> step through the tokens, <code>u</code> jumps to the next unsure one, <code>f</code> follows the reply.</div><div class="ms-models-h">Default setup</div><div>Pi&#x27;s requests are traced; <code>ctrl+\</code> opens the dock, <code>m</code> swaps it for the mini dock.</div></div></div>
+<p>The first thing in the dock is simply the reply itself, with each token colour coded by the probability the model gave it. As in the demo, it appears in the dock in real time as the model generates.</p>
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/mini-dock.jpg"><source src="/files/metalscope/mini-dock.webm" type="video/webm"><source src="/files/metalscope/mini-dock.mp4" type="video/mp4"></video><figcaption>The whole terminal: <code>m</code> swaps the dock for the mini dock while a reply is written.</figcaption></figure></div>
+
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/follow.jpg"><source src="/files/metalscope/follow.webm" type="video/webm"><source src="/files/metalscope/follow.mp4" type="video/mp4"></video><figcaption>The dock follows a reply as it is written.</figcaption></figure></div>
+<p>Alongside the reply there&#x27;s the probability map, which is the same thing laid out as a grid (thinking is dimmed), and the current token with the top 10 predictions at that step. Then come the lenses and the expert map: a grid per layer where every cell is an individual expert. You can move through all the tokens both during and after generation.</p>
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/map.jpg"><source src="/files/metalscope/map.webm" type="video/webm"><source src="/files/metalscope/map.mp4" type="video/mp4"></video><figcaption><code>←</code> <code>→</code> one token at a time, <code>u</code> the next unsure one, <code>1</code> the whole session as a map.</figcaption></figure></div>
+
+
+
+<hr class="ms-section" data-section="Maps">
+<div class="ms-head"><h3 id="maps">Maps</h3><div class="ms-models"><div class="ms-models-h">Runs on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Any chat model</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Any chat model</li></ul></div></div><div class="ms-models-h">What it is</div><div>The same colours as the reply, one cell per token, so a whole reply&#x27;s sure and unsure stretches show at a glance.</div><div class="ms-models-h">In practice</div><div><code>←</code> <code>→</code> move through the cells, and TOKENS shows the ten candidates the model weighed for the one in focus.</div><div class="ms-models-h">Default setup</div><div>On the board under REPLY; <code>1</code> opens it full size, the whole session.</div></div></div>
+<p>The reply and the probability map show the same thing, but sometimes it&#x27;s nicer to have a condensed, at-a-glance view of how the model is generating. The example below shows how <em>clearly</em> the probabilities differ with the kind of text. In the first pane the model lists the countries of the world with their capitals, and the map is mostly green: outside of the prose, most of those tokens are very obvious. In the third pane the model is asked for a nonsense poem, and interestingly the result is a string of tokens with much flatter distributions. It&#x27;s tempting to read this as confidence but that&#x27;s not really what it is. A nonsense poem has lots of equally good next words, so the probability is spread across them.</p><p>The second pane is code, which has a very structured syntax and grammar, so the map is mostly green as well. The two tokens that decide what the function is going to be about, <code>print</code> and <code>tokens</code>, are among the least obvious (39% and 45%), while the <code>def</code> just before them is at 100%.</p>
+<figure class="ms-widget"><div id="ms-maps"></div></figure>
+
+
+<hr class="ms-section" data-section="Engram">
+<div class="ms-head"><h3 id="engram">Engram</h3><div class="ms-models"><div class="ms-models-h">Runs on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.8 Flash Next</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li><li>DeepSeek V4.1 Flash<small>disk streaming only</small></li></ul></div></div><div class="ms-models-h">What it is</div><div>A second pass over a finished reply with the model&#x27;s n-gram lookup switched off, to see which tokens the lookup helped.</div><div class="ms-models-h">In practice</div><div>MAP turns blue where it helped, and TOKENS shows each candidate without and with it.</div><div class="ms-models-h">Default setup</div><div><code>g</code> on a finished reply.</div></div></div>
+<p>Engrams were first introduced by DeepSeek in <a href="https://arxiv.org/abs/2601.07372">a paper</a>, although DeepSeek V4, which came out afterwards, didn&#x27;t use one. Qwen3.8 Flash Next shipped its own version in August, and DeepSeek V4.1 Flash followed a few weeks later. Both run well on my M5 Max with 128 GB of RAM and I use them a lot, so it was natural to see how much the engram actually helps.</p><p>The name is a play on &quot;n-grams&quot; (an engram is also the neuroscience word for a memory trace), and you can think of the module as the model&#x27;s internal look-up table for information that doesn&#x27;t really need any context. Take King Arthur: a well-known figure who shows up in tons of stories about knights and adventures in Britain. The usual thinking was that this kind of knowledge is spread through the model&#x27;s layers, and that the representation of an &quot;Arthur&quot; token has to be refined layer by layer, meaning all that knowledge about King Arthur might not really be available until the model has processed the token through several layers. The new architecture from DeepSeek (and now Qwen) tackles that with an engram module, which is functionally a trained look-up table that gives static information a designated place.</p><p>Once the model has finished a reply, press <code>g</code> in the dock. Metalscope runs the reply through the model a second time with the engram switched off, and compares each token&#x27;s probability with and without it; the dock colour codes the tokens it helped. It scores the reply already written, not what the model would have written without it.</p><p>This can take a while, so there&#x27;s a little &quot;processing&quot; animation and a loading bar to tell you how long it might take. The probability map is then repurposed as an engram map, to give a sense of how many of the tokens were helped. Ask the model to count from 1 to 100 and almost nothing is helped (about 1% when measured), since no actual knowledge is needed for that.</p>
+<div class="ms-clips"><figure style="--ar:1.781"><video loop muted playsinline controls preload="none" poster="/files/metalscope/engram.jpg"><source src="/files/metalscope/engram.webm" type="video/webm"><source src="/files/metalscope/engram.mp4" type="video/mp4"></video><figcaption><code>g</code>: the lookup&#x27;s share of each token.</figcaption></figure></div>
+<p>To demo this, we ask the local model for the opening of Wikipedia&#x27;s article on black holes. It&#x27;s a very information-dense topic, covering lots of subtopics and full of terminology: exactly the type of text that might benefit from a lookup that passes in a bit more than you&#x27;d get from the text alone. In the frame below you can hover over the tokens (as you can in the dock) to see which ones benefited most from the lookup.</p><p>It&#x27;s somewhat surprising how well the model still predicts the same text with the engram switched off: almost half of the tokens here got no help from it at all. Still, it&#x27;s a hint that a lot of what the engram stores can also be worked out the long way, through the layers.</p>
+<figure class="ms-widget"><div id="ms-engram"></div><figcaption class="ms-cap">Text: Wikipedia, CC BY-SA, as the model recalled it.</figcaption></figure>
+
+
+<hr class="ms-section" data-section="Lenses">
+<div class="ms-head"><h3 id="lenses">Lenses</h3><div class="ms-models"><div class="ms-models-h">Logit lens</div><ul><li>Every model</li></ul><div class="ms-models-h">Jacobian lens</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.5 2B</li><li>Qwen3.6 35B</li><li>Qwen3.8 Flash Next</li><li>Inkling 2 Mini<small>fitted with /jlens learn; none ships</small></li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li></ul></div></div><div class="ms-models-h">What it is</div><div>What the model would say if it stopped at each layer. The logit lens needs no fit; the Jacobian lens is fitted once per model and reads the middle layers better.</div><div class="ms-models-h">In practice</div><div>LENS shows the token in focus layer by layer, and SETTLING marks the layer where each token settled. <code>-</code> and <code>+</code> change how many layers are read, <code>s</code> switches lens.</div><div class="ms-models-h">Default setup</div><div>Both lenses at step 2 (15 layers on Flash Next). <code>/jlens learn windows 8</code> fits a lens on 8 windows of text; a published one can be converted.</div></div></div>
+<p>The features so far mostly work from the model&#x27;s output: the logits and probabilities. The rest look at the internal activations, which are just as interesting but very much up for interpretation.</p><p>We present the lens below as a kind of microscope, one we can make deeper or shallower depending on how much information we want. The logit lens is a very simple idea: take the final output layer, the one that produces the logits, and stick it after any other layer. That gives you the prediction the model would have made had it stopped processing at that point.</p><p>It does give a sense of the internal state, but it&#x27;s not a great lens. Nothing really forces the representations at the beginning or middle of a model to line up with the output layer, so the logit lens often only starts to show any consistency near the end of the model.</p><p>The <a href="https://github.com/anthropics/jacobian-lens">Jacobian lens</a>, on the other hand, shows a lot more consistency, but it needs some additional training. Instead of using the output layer alone, it adds a matrix per layer that aligns the directions of the internal representation with the directions the output layer expects. To get that matrix we measure, over lots of text, how a small change to a layer&#x27;s state changes the model&#x27;s final state (that&#x27;s the Jacobian) and take the average. A layer&#x27;s state goes through its matrix first and only then through the output layer; the logit lens is the same thing with the matrix left out. The result is a clearer and more consistent picture of which &quot;tokens&quot; or concepts are being represented, and a hint of when the model settled on what to say.</p><p>To visualise this neatly, metalscope has a &quot;SETTLING&quot; map, which shows the layer at which the model &quot;settled&quot; on its decision to output a specific token. What&#x27;s interesting is that tokens which appear later in the text are often already represented in the internal state several tokens beforehand. The window we fit on is only 128 tokens by default, but that&#x27;s plenty of time for concepts to show up in the model&#x27;s internal state.</p>
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/lens.jpg"><source src="/files/metalscope/lens.webm" type="video/webm"><source src="/files/metalscope/lens.mp4" type="video/mp4"></video><figcaption>LENS under SETTLING on the board; <code>2</code> puts the J-lens and the logit lens side by side.</figcaption></figure></div>
+
+<figure class="ms-widget"><div id="ms-settle"></div></figure>
+<p>Here the lens already reads &quot;syrup&quot; at layer 4, while low-probability words like &quot;warm&quot; or &quot;like&quot; never settle in the lens but are still output at the end. A token settling early doesn&#x27;t mean the processing after it is wasted: that computation can still set up concepts that show up later on, and is still part of the model&#x27;s planning.</p>
+<div class="ms-charts"><div><div class="ms-chart" data-fig="lens_windows" style="height:300px" role="img" aria-label="More fitted windows, a sharper J-lens"></div><p class="ms-cap">Held-out hit@10: how often the model&#x27;s own next token is in the lens&#x27;s top 10, scored after each window of the fit. Dashed: each model&#x27;s logit lens, which needs no fit. Each model is scored on its own middle layers (Flash Next 20 to 44, the 35B 16 to 36, Inkling 2 Mini 7 of its layer visits), so compare a model with its own dashed line, not with another model. Inkling&#x27;s first 7 windows were scored another way and are left out.</p></div><div><div class="ms-chart" data-fig="lens_speed" style="height:340px" role="img" aria-label="Tracing costs little, the lenses cost by the layer"></div><p class="ms-cap">Tokens a second at each setting, on a log axis (the table below has the same numbers). Each lens step reads more layers, from the lightest to every layer the lens has. A 300-token reply, the median of 3.</p></div></div>
+<p>The more windows of text we include in the lens training, the better the fit: on Flash Next, the model&#x27;s next token was in the lens&#x27;s top 10 for 15% of held-out positions after 1 window and 28% after 36, against 14% for the logit lens (the dashed lines), which needs no training at all. Those scores are over the middle layers only (20 to 44), which is the hard part: by the last layers any lens agrees with the output. A window took about 35 minutes on my Mac, and you can&#x27;t really use the model to chat or work in the meantime, so it&#x27;s an overnight job.</p><p>In metalscope, a simple <code>/jlens learn windows 8</code> fits the lens on 8 windows of text. It loads its own MLX copy of the model, so it only works for models served by oMLX and not ds4. Once the lens is learned, though, you can easily use it with ds4, which is often the faster inference path: metalscope gives you a neat way of linking a lens to any served version of the same model.</p>
+<p>We can control how many layers we read, and every layer read has a cost. A logit lens reading is one extra matmul: the layer&#x27;s state through the output layer. A J-lens reading is two: first through the lens matrix, then through the output layer. The output layer matmul covers the whole vocabulary, the same one the model does once per token to make its prediction, so reading many layers repeats the most expensive step many times and your decode speed drops. It&#x27;s a reasonable slowdown though, and the lenses are some of the more fun things to look at and play around with.</p>
+
+<hr class="ms-section" data-section="Word swap (experimental)">
+<div class="ms-head"><h3 id="word-swap">Word swap (experimental)</h3><div class="ms-models"><div class="ms-models-h">Needs a Jacobian lens</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.5 2B</li><li>Qwen3.6 35B</li><li>Qwen3.8 Flash Next</li><li>Inkling 2 Mini<small>fitted with /jlens learn; none ships</small></li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li></ul></div></div><div class="ms-models-h">What it is</div><div>A word removed from the model&#x27;s internal state, or swapped for another, using the Jacobian lens&#x27;s direction for that word.</div><div class="ms-models-h">In practice</div><div>In LENS, <code>enter</code> on a token, type the new word, and the reply is redone from that token. <code>/steer old&gt;new</code> does it for a whole reply.</div><div class="ms-models-h">Default setup</div><div>Needs a J-lens. The push is 0.35 unless given.</div></div></div>
+<p>So a lens gives us a sense of what the model could have said. But sometimes we might want it to say something else! The Jacobian lens gives us a fun way to encourage that.</p><p>If we take a token&#x27;s row of the output layer and pass it back through the Jacobian lens, we get a vector for that token in the internal state: the direction to nudge the state at that layer to make the token more likely. If I want the &quot;Lord&quot; token to be more likely, I can find its vector and add it to the internal state at a given layer. In the same way, I can find the vector of a token I want gone and take it out. In metalscope you can either delete a word or swap it for another, and that may change what the model goes on to say.</p>
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/word-swap.jpg"><source src="/files/metalscope/word-swap.webm" type="video/webm"><source src="/files/metalscope/word-swap.mp4" type="video/mp4"></video><figcaption>Left swapped for Lord: The Left Hand of Darkness becomes The Lord of the Rings.</figcaption></figure></div>
+<p>It&#x27;s mostly a fun experiment, but maybe you could stop a model overthinking by swapping &quot;Wait!&quot; for &quot;Aha!&quot;. And depending on the word you remove, you might change the token without changing the overall meaning of the sentence.</p>
+
+
+<hr class="ms-section" data-section="Experts">
+<div class="ms-head"><h3 id="experts">Experts</h3><div class="ms-models"><div class="ms-models-h">Runs on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.6 35B</li><li>Qwen3.8 Flash Next</li><li>Inkling 2 Mini</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li><li>DeepSeek V4.1 Flash</li></ul></div></div><div class="ms-models-h">What it is</div><div>Which experts each layer routed the token to (Flash Next: 10 of 512 in a layer).</div><div class="ms-models-h">In practice</div><div>EXPERTS lights them for the token in focus. <code>4</code> then <code>enter</code> opens a layer, then one expert: the tokens it is most distinctive for, counted from your own traced chats.</div><div class="ms-models-h">Default setup</div><div>A few layers on the board, more with <code>4</code>. <code>metalscope experts layout</code> seats experts that fire together side by side.</div></div></div>
+<p>The most visually striking part of metalscope is the expert map. Naturally it&#x27;s only there for MoE models: with a dense model, that space is mostly filled by additional lenses.</p><p>Routing is fun to watch, and it&#x27;s easy to see why we call them &quot;experts&quot;: the intuitive picture is that the model smartly hands out specialities, sending each MLP the kinds of tokens, or sequences of tokens, it has been trained to handle best. In reality that&#x27;s only a small part of the story, and what an expert ends up learning is often not all that intuitive.</p><p>Sometimes, though, we do get a fun glimpse of what&#x27;s going on. If we ask the model to name all the knights of the Round Table, the expert map shows which expert in each layer was routed which token, and in layer 8 at least, expert 151 gets every one of the knights&#x27; names! So voilà, we have (loosely) identified a name expert.</p>
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/experts-live.jpg"><source src="/files/metalscope/experts-live.webm" type="video/webm"><source src="/files/metalscope/experts-live.mp4" type="video/mp4"></video><figcaption>EXPERTS while a reply is written.</figcaption></figure></div>
+
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/experts.jpg"><source src="/files/metalscope/experts.webm" type="video/webm"><source src="/files/metalscope/experts.mp4" type="video/mp4"></video><figcaption>A layer, then one expert: #151 of layer 8 takes the knights&#x27; names.</figcaption></figure></div>
+<p>Is this useful? Not directly, but it is interesting. Experts that specialise cleanly can hint at healthy training dynamics, but without watching the training itself it&#x27;s hard to say much: all we have is the finished model. Specialisation is something you might <em>want</em> to emerge, but in practice it&#x27;s rarely the main target. At best it&#x27;s a diagnostic; for a local setup, it&#x27;s a good light show.</p>
+
+
+<hr class="ms-section" data-section="Steering">
+<div class="ms-head"><h3 id="steering">Steering</h3><div class="ms-models"><div class="ms-models-h">Runs on</div><div class="ms-engines"><div class="ms-engine"><b>oMLX</b><ul><li>Qwen3.5 2B</li><li>Qwen3.6 35B</li><li>Qwen3.8 27B</li><li>Qwen3.8 Flash Next</li><li>Inkling 2 Mini</li></ul></div><div class="ms-engine"><b>ds4</b><ul><li>Qwen3.8 Flash Next</li><li>DeepSeek V4.1 Flash</li></ul></div></div><div class="ms-models-h">What it is</div><div>A learned direction for a concept, added to the model&#x27;s internal state at one layer on every token, to push its style without a prompt.</div><div class="ms-models-h">In practice</div><div><code>/steer NAME</code> turns it on. <code>/concept learn NAME</code> makes a new one: the model writes its own example texts, then tests doses in conversation. <code>6</code> opens the Steer page with the test chats.</div><div class="ms-models-h">Default setup</div><div>33 concepts ship. A concept&#x27;s default dose is the one with the most good replies of 18 in its chat test.</div></div></div>
+<p>Steering is the most experimental part of the repository, but it reveals a lot of underlying structure in the activations. It needs no model training, so it&#x27;s relatively light on your machine&#x27;s memory, but it does need a lot of generation and measurement.</p><p>ds4 has shipped its own directional steering built from prompt files you write yourself, and there&#x27;s a proposal to port it to oMLX. Metalscope adds a short recipe around it: the local model writes its own pairs, the dose is calibrated in conversation, and it&#x27;s all switched on and off from the dock.</p><p>The recipe has many parts and relies on the model itself to generate all the data. That makes it a bit slow, but it&#x27;s very satisfying that your own local model can produce the vector that lets you push and pull it towards a certain style.</p><p>What we show below is the result of <code>/concept learn shakespearean</code>. The recipe:</p><ol class="ms-list"><li>The model writes 16 pairs of lines: the same sentence with and without the concept.</li><li>Both sides of every pair go through the model again, and we record the internal state at one layer.</li><li>Average the states of the &quot;with&quot; lines, average the &quot;without&quot; lines, and subtract: what&#x27;s left points (loosely) toward the concept.</li><li>Calibrate: the model holds 3 short conversations (18 replies) at each of a ladder of doses, with the vector added at every token.</li><li>The model grades its own replies for style, coherence and usefulness, 0-3 each. A reply is good if all three score at least 2.</li><li>The dose with the most good replies becomes the default.</li></ol><p>No weights are touched and there&#x27;s no prompt: the vector is added to the model&#x27;s state as it generates. Worth noting that the local model grading itself is a weak spot, since it may go easy on its own replies. Still, it keeps everything self-contained on your machine.</p>
+<div class="ms-clips ms-narrow"><figure style="--ar:0.774"><video loop muted playsinline controls preload="none" poster="/files/metalscope/steer-page.jpg"><source src="/files/metalscope/steer-page.webm" type="video/webm"><source src="/files/metalscope/steer-page.mp4" type="video/mp4"></video><figcaption><code>6</code>: the Steer page.</figcaption></figure></div>
+
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/steer-pirate.jpg"><source src="/files/metalscope/steer-pirate.webm" type="video/webm"><source src="/files/metalscope/steer-pirate.mp4" type="video/mp4"></video><figcaption>On the Steer page, <code>enter</code> turns pirate on at its default dose; <code>m</code> swaps the mini dock and the full one.</figcaption></figure></div>
+<p>Adding the vector at every token, in just one layer, is enough to really drive the model&#x27;s style of speech. Too high a dose clearly breaks things though (often more so the longer you chat, since every token gets pushed).</p>
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/steer-shakespeare.jpg"><source src="/files/metalscope/steer-shakespeare.webm" type="video/webm"><source src="/files/metalscope/steer-shakespeare.mp4" type="video/mp4"></video><figcaption><code>/steer shakespearean</code> turns it on by command, at its default dose, for a Monday pep talk.</figcaption></figure></div>
+
+<figure class="ms-widget"><div id="ms-steer"></div></figure>
+
+<div class="ms-charts"><div><div class="ms-chart" data-fig="steer_dose" style="height:300px" role="img" aria-label="Too little does nothing, too much breaks"></div><p class="ms-cap">Qwen3.8 27B oQ4e-mtp on oMLX, all three concepts calibrated the same day with the same 18 turns. A reply is good when it shows the concept and stays coherent and useful. Dose 0 is no steering.</p></div><div><div class="ms-chart" data-fig="concept_models" style="height:300px" role="img" aria-label="One concept, a different dose per model"></div><p class="ms-cap">pirate on three models, each calibrated and graded by itself: Qwen3.8 Flash Next (ds4 q4k), Qwen3.8 27B (oMLX), DeepSeek V4.1 Flash (ds4 q2, with Pi&#x27;s system prompt and tools; the others with a plain one). Dose 0 is no steering.</p></div></div>
+<p>Finding the right dose matters though. The chart shows good replies out of 18 at each dose. Dose too strongly and the model breaks; dose too little and nothing happens: the push is too small to register against the rest of the model&#x27;s state.</p>
+<p>Each model needs its own calibration: the same concept peaks at a different dose on different models.</p>
+<p>One side experiment: instead of adding a vector, amplify single neurons. On Qwen3.6 35B one neuron was enough to get some of &quot;joyful&quot; (10 good replies out of 18, against 15 for the learned vector); on the larger Flash Next it took about 20 together (17 of 18). If a more reliable recipe turns up, it&#x27;ll go into metalscope as well!</p>
+<h2 class="ms-section" id="other-models">Other models</h2>
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/support-inkling.jpg"><source src="/files/metalscope/support-inkling.mp4" type="video/mp4"></video><figcaption>Inkling 2 Mini on oMLX: a pancake recipe, then MAP, LENS, RESIDUAL STREAM, EXPERTS and the mini dock.</figcaption></figure></div>
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/support-27b.jpg"><source src="/files/metalscope/support-27b.mp4" type="video/mp4"></video><figcaption>Qwen3.8 27B on oMLX, a dense model: no experts, so the walk is MAP, LENS and the mini dock.</figcaption></figure></div>
+<div class="ms-clips"><figure style="--ar:2.009"><video loop muted playsinline controls preload="none" poster="/files/metalscope/support-v41.jpg"><source src="/files/metalscope/support-v41.mp4" type="video/mp4"></video><figcaption>DeepSeek V4.1 Flash on ds4: the same walk as Inkling.</figcaption></figure></div>
+<h2 class="ms-section" id="impact-on-decode-speed">Impact on decode speed</h2><p>In speed, model by model:</p><div class="ms-charts"><div><div class="ms-chart" data-fig="lens_speed" style="height:340px" role="img" aria-label="Tracing costs little, the lenses cost by the layer"></div><p class="ms-cap">Tokens a second at each setting, on a log axis (the table below has the same numbers). Each lens step reads more layers, from the lightest to every layer the lens has. A 300-token reply, the median of 3.</p></div></div><div class="ms-bench ms-key"><table><tbody><tr><td>Tracing off</td><td>nothing is recorded, which matches default engine speed.</td></tr><tr><td>Tracing on, lenses off</td><td>enables everything in the dock but LENS: each token&#x27;s probability and top 10 candidates, the expert routing and the residual stream.</td></tr><tr><td>Tracing on, lenses on</td><td>the logit and Jacobian lenses as well, read at more layers at each of five steps: lightest is the fewest layers, default the middle step, fullest every layer the lens has. <code>-</code> and <code>+</code> in the dock change the step.</td></tr></tbody></table></div><div class="ms-bench"><table><thead><tr><th></th><th></th><th></th><th colspan="4" class="ms-span">tracing on</th></tr><tr><th></th><th>precision</th><th>tracing off</th><th>lenses off</th><th>light lens</th><th>default lens</th><th>full lens</th></tr></thead><tbody><tr><td>Qwen3.5 2B, oMLX</td><td>4-bit</td><td>288</td><td>264</td><td>209</td><td>218</td><td>183</td></tr><tr><td>Qwen3.6 35B, oMLX</td><td>4-bit</td><td>205</td><td>192</td><td>169</td><td>158</td><td>112</td></tr><tr><td>Qwen3.8 27B (MTP), oMLX</td><td>oQ4e</td><td>57</td><td>58</td><td>54</td><td>48</td><td>40</td></tr><tr><td>Qwen3.8 Flash Next, oMLX</td><td>oQ4e</td><td>44</td><td>41</td><td>34</td><td>21</td><td>11</td></tr><tr><td>Inkling 2 Mini (MTP), oMLX</td><td>oQ4e</td><td>74</td><td>64</td><td>53</td><td>28</td><td>11</td></tr><tr><td>Qwen3.8 Flash Next, ds4</td><td>q4k</td><td>69</td><td>63</td><td>55</td><td>40</td><td>18</td></tr><tr><td>DeepSeek V4.1 Flash, ds4</td><td>q2</td><td>16</td><td>16</td><td>16</td><td>15</td><td>14</td></tr></tbody></table></div><p class="ms-cap">Tokens a second from <code>metalscope bench</code> on an M5 Max with 128 GB: a 300-token reply, the median of 3, each setting after a minute&#x27;s rest.</p>
+<h2 id="try-it">Try it</h2>
+<p>A Mac with Apple Silicon, and oMLX or ds4 serving the model. The <a href="https://github.com/nanastassacos/metalscope">README</a> has the rest.</p>
+<pre><code>uv tool install git+https://github.com/nanastassacos/metalscope
+metalscope omlx install
+metalscope omlx restart
+npm install -g @earendil-works/pi-coding-agent
+metalscope pi install
+metalscope doctor</code></pre>
+<p>Built on <a href="https://github.com/antirez/ds4">ds4</a>, <a href="https://github.com/jundot/omlx">oMLX</a>, <a href="https://github.com/earendil-works/pi">Pi</a> and Anthropic's <a href="https://github.com/anthropics/jacobian-lens">Jacobian lens</a>. If you try it, I'd love to hear what you see, and if you're into mechanistic interpretability, which analysis you'd like to see included.</p>
+<p class="ms-foot">One feature did not make it: attention sources, which showed for each token the stretch of the conversation its attention drew on most. On Flash Next that was the very first stretch (the attention sink) on 71% of tokens, so it was neither informative nor fun to look at, and it was removed.</p>
+</div>
+</main>
+<footer><a href="https://github.com/nanastassacos/metalscope">github.com/nanastassacos/metalscope</a></footer>
+<script>window.MS_THEME = {"clear": true, "font": "\"Instrument Sans\", system-ui, sans-serif"};</script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script><script src="/files/metalscope/charts.js"></script><script>
+(function(){
+  var vids = document.querySelectorAll('.ms-post video[loop]');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){
+      if (e.isIntersecting) { var p = e.target.play(); if (p && p.catch) p.catch(function(){}); } else e.target.pause();
+    }); }, {threshold: 0.4});
+    vids.forEach(function(v){ io.observe(v); });
+  }
+  function draw(){
+    if (!window.Plotly || !window.MS_FIGS) return;
+    document.querySelectorAll('.ms-post .ms-chart').forEach(function(el){
+      var f = window.MS_FIGS[el.dataset.fig]; if (!f) return;
+      var T = window.MS_THEME || {}, s = JSON.stringify(f);
+      if (T.dark && window.MS_SWAP) {   // one pass: a dark step is another's light step
+        var keys = Object.keys(window.MS_SWAP).map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+        s = s.replace(new RegExp(keys.join('|'), 'g'), function(m){ return window.MS_SWAP[m]; });
+      }
+      f = JSON.parse(s);
+      var lay = Object.assign({}, f.layout, {autosize: true}); delete lay.width;
+      if (T.clear) lay.paper_bgcolor = lay.plot_bgcolor = 'rgba(0,0,0,0)';
+      if (T.font) lay.font = Object.assign({}, lay.font, {family: T.font});
+      Plotly.newPlot(el, f.data, lay, {displayModeBar: false, responsive: true});
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', draw); else draw();
+})();
+</script><script src="/files/metalscope/data.js"></script><script src="/files/metalscope/widgets.js"></script>
+
+</body></html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nicolas Anastassacos</title>
+<meta name="description" content="Nicolas Anastassacos: language models, interpretability and multi-agent learning.">
+<meta property="og:type" content="website"><meta property="og:title" content="Nicolas Anastassacos">
+<meta property="og:description" content="Language models, interpretability and multi-agent learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* The post's Paper look (blog/post/variants.py: BASE and PAPER), so the home page and the post read as one site. */
+:root{--bg:#fafafb;--ink:#1c1f26;--muted:#636976;--rule:#e1e3e9;--accent:#5a3fcf}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 "Instrument Sans",system-ui,sans-serif}
+a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+main,footer{max-width:calc(44rem + 40px);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+main{padding-top:4.6rem;padding-bottom:3rem}
+h1{font-size:clamp(1.8rem,4.6vw,2.3rem);line-height:1.1;letter-spacing:-.022em;font-weight:600;margin:0 0 1.4rem;text-wrap:balance}
+h2{font-size:1.05rem;font-weight:600;letter-spacing:0;margin:3.2rem 0 1rem;padding-top:1.1rem;border-top:1px solid var(--ink)}
+p{margin:0 0 1rem}
+.links{list-style:none;margin:1.4rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem 1.4rem;font-size:.95rem}
+.items{list-style:none;margin:0;padding:0}
+.items li{margin:0 0 1.15rem}
+.items .t{font-weight:500}
+.items .d{display:block;color:var(--muted);font-size:.9rem;line-height:1.45;margin-top:.15rem}
+.tags{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:.78rem;margin-left:.5rem}
+.tags a{text-decoration:none}
+.tags a:hover{text-decoration:underline}
+.when{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--muted);margin-right:.6rem}
+.more{font-size:.92rem;margin-top:1.4rem}
+.demo{margin:1.1rem 0 .4rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.3rem 1rem}
+.demo figure{margin:0}
+.demo .clip{position:relative}
+.demo video{display:block;width:100%;aspect-ratio:1300/1680;background:#0b0d11;border-radius:6px;cursor:pointer}
+.demo video:fullscreen{border-radius:0;cursor:default}
+.demo .full{position:absolute;top:.5rem;right:.5rem;width:2rem;height:2rem;padding:0;border:0;border-radius:4px;background:rgba(11,13,17,.72);color:#e6e8ee;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.55;transition:opacity .15s}
+.demo .clip:hover .full,.demo .full:focus-visible{opacity:1}
+.demo .full:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.demo .full svg{width:1rem;height:1rem}
+.demo figcaption{color:var(--muted);font-size:.85rem;line-height:1.4;margin-top:.45rem}
+.demo figcaption b{color:var(--ink);font-weight:500}
+footer{padding-top:1.5rem;padding-bottom:3rem;font-size:.85rem;color:var(--muted)}
+</style>
+</head><body>
+<main>
+<h1>Nicolas Anastassacos</h1>
+
+<p>I work on post-training of language models at NatWest. Before that I worked on large language models at Amazon,
+including the Nova family, until April 2026, and did a PhD at UCL on how cooperation emerges between reinforcement
+learning agents, funded by the Alan Turing Institute.</p>
+
+<ul class="links">
+<li><a href="https://github.com/nanastassacos">GitHub</a></li>
+<li><a href="https://scholar.google.co.uk/citations?hl=en&user=_Z0hKAEAAAAJ">Google Scholar</a></li>
+<li><a href="https://www.linkedin.com/in/nicolasanastassacos/">LinkedIn</a></li>
+</ul>
+
+<h2>Projects</h2>
+<ul class="items">
+<li><span class="t">metalscope</span>
+<span class="tags"><a href="https://github.com/nanastassacos/metalscope">[code]</a> <a href="/posts/2026/11/metalscope/">[blog]</a></span>
+<span class="d">A live view of what your local model is doing while it works.</span>
+<div class="demo">
+<figure><div class="clip"><video loop muted playsinline preload="none" poster="/files/metalscope/engram-dock.jpg" aria-label="Engram demo"><source src="/files/metalscope/engram-dock.webm" type="video/webm"><source src="/files/metalscope/engram-dock.mp4" type="video/mp4"></video><button class="full" type="button" aria-label="Full screen"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button></div><figcaption><b>Visualising the impact of Engram</b></figcaption></figure>
+<figure><div class="clip"><video loop muted playsinline preload="none" poster="/files/metalscope/word-swap.jpg" aria-label="Word swap demo"><source src="/files/metalscope/word-swap.webm" type="video/webm"><source src="/files/metalscope/word-swap.mp4" type="video/mp4"></video><button class="full" type="button" aria-label="Full screen"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button></div><figcaption><b>Inspecting and word swapping with J lens</b></figcaption></figure>
+<figure><div class="clip"><video loop muted playsinline preload="none" poster="/files/metalscope/stream.jpg" aria-label="Residual stream demo"><source src="/files/metalscope/stream.webm" type="video/webm"><source src="/files/metalscope/stream.mp4" type="video/mp4"></video><button class="full" type="button" aria-label="Full screen"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button></div><figcaption><b>Following with unusual residual streams</b></figcaption></figure>
+<figure><div class="clip"><video loop muted playsinline preload="none" poster="/files/metalscope/experts.jpg" aria-label="Experts demo"><source src="/files/metalscope/experts.webm" type="video/webm"><source src="/files/metalscope/experts.mp4" type="video/mp4"></video><button class="full" type="button" aria-label="Full screen"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button></div><figcaption><b>Inspecting expert roles</b></figcaption></figure>
+</div></li>
+</ul>
+
+<h2>Papers and reports</h2>
+<ul class="items">
+<li><span class="when">2026</span><a class="t" href="https://arxiv.org/abs/2604.07030">MoE Routing Testbed: Studying Expert Specialization and Routing Behavior at Small Scale</a>
+<span class="d">T. Falke, N. Anastassacos, et al. arXiv preprint.</span></li>
+<li><span class="when">2025</span><a class="t" href="https://www.amazon.science/publications/amazon-nova-2-multimodal-reasoning-and-generation-models">Amazon Nova 2: Multimodal Reasoning and Generation Models</a>
+<span class="d">Amazon Artificial General Intelligence. Technical report.</span></li>
+<li><span class="when">2024</span><a class="t" href="https://www.amazon.science/publications/the-amazon-nova-family-of-models-technical-report-and-model-card">The Amazon Nova Family of Models: Technical Report and Model Card</a>
+<span class="d">Amazon Artificial General Intelligence. Technical report.</span></li>
+<li><span class="when">2021</span><a class="t" href="https://arxiv.org/abs/2102.07523">Cooperation and Reputation Dynamics with Reinforcement Learning</a>
+<span class="d">N. Anastassacos, J. García, S. Hailes, M. Musolesi. AAMAS 2021.</span></li>
+<li><span class="when">2020</span><a class="t" href="https://arxiv.org/abs/1902.03185">Partner Selection for the Emergence of Cooperation in Multi-Agent Systems Using Reinforcement Learning</a>
+<span class="d">N. Anastassacos, S. Hailes, M. Musolesi. AAAI 2020.</span></li>
+<li><span class="when">2018</span><a class="t" href="https://arxiv.org/abs/1805.11324">Bayesian Inference with Anchored Ensembles of Neural Networks, and Application to Reinforcement Learning</a>
+<span class="d">T. Pearce, N. Anastassacos, M. Zaki, A. Neely. ICML Workshop 2018.</span></li>
+</ul>
+<p class="more">The rest is on
+<a href="https://scholar.google.co.uk/citations?hl=en&user=_Z0hKAEAAAAJ">Google Scholar</a>.</p>
+</main>
+<script>
+// The demo clips play while they are on screen, like gifs; a click pauses or plays one, the corner button fills the screen.
+(function () {
+  var videos = document.querySelectorAll(".demo video");
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function play(v) { var p = v.play(); if (p) p.catch(function () {}); }
+  videos.forEach(function (v) {
+    if (still) v.controls = true;
+    v.addEventListener("click", function () { if (!v.controls) { if (v.paused) play(v); else v.pause(); } });
+    v.parentNode.querySelector(".full").addEventListener("click", function () {
+      if (v.requestFullscreen) v.requestFullscreen(); else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+      play(v);
+    });
+  });
+  if (still || !("IntersectionObserver" in window)) return;
+  var seen = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) play(e.target); else e.target.pause(); });
+  }, { threshold: 0.25 });
+  videos.forEach(function (v) { seen.observe(v); });
+})();
+</script>
+<footer>© 2026 Nicolas Anastassacos</footer>
+</body></html>
